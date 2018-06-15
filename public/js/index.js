@@ -10,16 +10,18 @@ socket.on('connect', () => {
 socket.on('newMessage', (message) => {
   console.log(message);
   const newMessage = document.createElement('li');
+  const formattedTime = moment(message.createdAt).format('LT');
 
-  newMessage.textContent = `${message.from}: ${message.text}`;
+  newMessage.textContent = `${message.from} ${formattedTime}: ${message.text}`;
   messages.appendChild(newMessage);
 });
 
 socket.on('newLocationMessage', (message) => {
   const newMessage = document.createElement('li');
   const anchor = document.createElement('a');
+  const formattedTime = moment(message.createdAt).format('LT');
 
-  newMessage.textContent = `${message.from}: `;
+  newMessage.textContent = `${message.from} ${formattedTime}: `;
   anchor.textContent = 'sharing my location...';
   anchor.setAttribute('target', '_blank');
   anchor.setAttribute('href', message.url);
