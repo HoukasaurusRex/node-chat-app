@@ -7,15 +7,41 @@ function scrollToBottom() {
   const newMessage = messages.querySelector('li:last-child');
   const newMessageHeight = newMessage.offsetHeight;
   const { clientHeight, scrollTop, scrollHeight } = messages;
-  console.log({ clientHeight, scrollTop, scrollHeight, newMessageHeight });
-
   if (clientHeight + scrollTop + newMessageHeight >= scrollHeight) {
     messages.scrollTop = scrollHeight;
   }
 }
 
 socket.on('connect', () => {
-  console.log('Connected to server');
+  const search = window.location.search.substring(1);
+  const params =
+    JSON.parse(
+      '{"' + search.replace(/&/g, '","').replace(/=/g,'":"').replace(/\+/g, '%20') + '"}',
+      function(key, value) {
+        return key === ""?value:decodeURIComponent(value)
+      });
+  console.log(params);
+  socket.emit('join', params, (err) => {
+    if (err) {
+      alert(err);
+      window.location.href = '/';
+    } else {
+      console.log('success!');
+    }
+  });
+});
+
+socket.on('updateUserList', (users) => {
+  const usersContainer = document.querySelector('#users');
+  const usersList = document.createElement('ol');
+  users.forEach((user) => {
+    const userItem = document.createElement('li');
+    userItem.textContent = user;
+    usersList.appendChild(userItem);
+
+  });
+  usersContainer.textContent = '';
+  usersContainer.appendChild(usersList);
 });
 
 socket.on('newMessage', (message) => {
@@ -43,17 +69,6 @@ socket.on('newLocationMessage', (message) => {
   });
 
   messages.innerHTML += html;
-  // const newMessage = document.createElement('li');
-  // const anchor = document.createElement('a');
-  // const formattedTime = moment(message.createdAt).format('LT');
-  //
-  // newMessage.textContent = `${message.from} ${formattedTime}: `;
-  // anchor.textContent = 'sharing my location...';
-  // anchor.setAttribute('target', '_blank');
-  // anchor.setAttribute('href', message.url);
-  // newMessage.appendChild(anchor);
-  //
-  // messages.appendChild(newMessage);
 });
 
 socket.on('disconnect', () => {
