@@ -8,26 +8,38 @@ socket.on('connect', () => {
 });
 
 socket.on('newMessage', (message) => {
-  console.log(message);
-  const newMessage = document.createElement('li');
   const formattedTime = moment(message.createdAt).format('LT');
+  const template = document.querySelector('#message-template').innerHTML;
+  const html = Mustache.render(template, {
+    from: message.from,
+    text: message.text,
+    createdAt: formattedTime,
+  });
 
-  newMessage.textContent = `${message.from} ${formattedTime}: ${message.text}`;
-  messages.appendChild(newMessage);
+  messages.innerHTML += html;
 });
 
 socket.on('newLocationMessage', (message) => {
-  const newMessage = document.createElement('li');
-  const anchor = document.createElement('a');
   const formattedTime = moment(message.createdAt).format('LT');
+  const template = document.querySelector('#location-message-template').innerHTML;
+  const html = Mustache.render(template, {
+    from: message.from,
+    url: message.url,
+    createdAt: formattedTime,
+  });
 
-  newMessage.textContent = `${message.from} ${formattedTime}: `;
-  anchor.textContent = 'sharing my location...';
-  anchor.setAttribute('target', '_blank');
-  anchor.setAttribute('href', message.url);
-  newMessage.appendChild(anchor);
-
-  messages.appendChild(newMessage);
+  messages.innerHTML += html;
+  // const newMessage = document.createElement('li');
+  // const anchor = document.createElement('a');
+  // const formattedTime = moment(message.createdAt).format('LT');
+  //
+  // newMessage.textContent = `${message.from} ${formattedTime}: `;
+  // anchor.textContent = 'sharing my location...';
+  // anchor.setAttribute('target', '_blank');
+  // anchor.setAttribute('href', message.url);
+  // newMessage.appendChild(anchor);
+  //
+  // messages.appendChild(newMessage);
 });
 
 socket.on('disconnect', () => {
